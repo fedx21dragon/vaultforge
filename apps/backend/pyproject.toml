@@ -1,0 +1,13 @@
+[project]
+name = "vaultforge-backend"
+version = "0.1.0"
+description = "Local backend for VaultForge"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

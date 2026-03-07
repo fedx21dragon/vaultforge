@@ -1,0 +1,2 @@
+APP_NAME = "VaultForge Backend"
+APP_VERSION = "0.1.0"
