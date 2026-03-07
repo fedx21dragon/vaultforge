@@ -110,9 +110,13 @@ dependencies:
       - dulwich==0.25.2
       - dunamai==1.25.0
       - durationpy==0.10
+      - email-validator==2.3.0
       - evaluate==0.4.6
       - faiss-cpu==1.12.0
       - fastapi==0.121.1
+      - fastapi-cli==0.0.24
+      - fastapi-cloud-cli==0.14.0
+      - fastar==0.8.0
       - fastjsonschema==2.21.2
       - filelock==3.20.0
       - filetype==1.2.0
@@ -257,6 +261,7 @@ dependencies:
       - pyproject-hooks==1.2.0
       - pytest==9.0.0
       - python-dotenv==1.2.1
+      - python-multipart==0.0.22
       - python-secrets==24.10.12
       - pytokens==0.3.0
       - pyyaml==6.0.3
@@ -269,12 +274,15 @@ dependencies:
       - resolvelib==1.0.1
       - rich==14.2.0
       - rich-argparse==1.7.2
+      - rich-toolkit==0.19.7
+      - rignore==0.7.6
       - rpds-py==0.28.0
       - rsa==4.9.1
       - safetensors==0.6.2
       - scikit-learn==1.7.2
       - scipy==1.16.3
       - sentence-transformers==5.1.2
+      - sentry-sdk==2.54.0
       - shellingham==1.5.4
       - sniffio==1.3.1
       - soupsieve==2.8
