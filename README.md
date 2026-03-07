@@ -23,9 +23,9 @@ Work in progress.
 
 ## Roadmap
 
-- [ ] bootstrap repository
-- [ ] backend skeleton
-- [ ] database foundation
+- [x] bootstrap repository
+- [x] backend skeleton
+- [x] database foundation
 - [ ] sample vault + parser
 - [ ] indexer
 - [ ] obsidian plugin skeleton
@@ -33,3 +33,26 @@ Work in progress.
 - [ ] retrieval
 - [ ] formula extraction
 
+## System Architecture
+
+```mermaid
+flowchart LR
+
+    A[Obsidian Vault\Markdown Notes] --> B[Vault Parser]
+    B --> C[Indexer]
+
+    C --> D[(SQLite Metadata DB)]
+    C --> E[(Vector Index)]
+
+    F[Obsidian Plugin] --> G[FastAPI Backend]
+
+    G --> H[Service Layer]
+
+    H --> D
+    H --> E
+
+    H --> I[Local LLM Runtime]
+
+    I --> G
+    G --> F
+```
