@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# Ensure backend root is on PYTHONPATH
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(BACKEND_ROOT))
 from datetime import datetime
 
 from app.db.session import SessionLocal
