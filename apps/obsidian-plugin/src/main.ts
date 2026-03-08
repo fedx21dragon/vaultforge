@@ -1,13 +1,24 @@
 import { Notice, Plugin } from "obsidian";
-import { fetchBackendHealth, searchNotes } from "./services/apiClient";
+import { fetchBackendHealth } from "./services/apiClient";
+import {
+	DEFAULT_SETTINGS,
+	type VaultForgeSettings,
+	VaultForgeSettingTab,
+} from "./settings";
+import { openSearchVaultModal } from "./commands/searchVault";
+import { generateTemplateCommand } from "./commands/generateTemplateFromVault";
 
 export default class VaultForgePlugin extends Plugin {
+	settings!: VaultForgeSettings;
+
 	async onload() {
-		console.log("VaultForge plugin loaded");
+		await this.loadSettings();
+
+		this.addSettingTab(new VaultForgeSettingTab(this.app, this));
 
 		this.addCommand({
-			id: "vaultforge-say-hello",
-			name: "VaultForge: Say Hello",
+			id: "vaultforge-check",
+			name: "Say Hello",
 			callback: () => {
 				new Notice("VaultForge plugin is running.");
 			},
@@ -15,10 +26,10 @@ export default class VaultForgePlugin extends Plugin {
 
 		this.addCommand({
 			id: "vaultforge-backend-health",
-			name: "VaultForge: Check Backend Health",
+			name: "Check Backend Health",
 			callback: async () => {
 				try {
-					const result = await fetchBackendHealth();
+					const result = await fetchBackendHealth(this.settings);
 					new Notice(`Backend status: ${result.status}`);
 				} catch (error) {
 					console.error(error);
@@ -28,27 +39,31 @@ export default class VaultForgePlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "vaultforge-search-control",
-			name: "VaultForge: Search Notes for 'control'",
+			id: "vaultforge-search-vault",
+			name: "Search Vault",
+			callback: () => {
+				openSearchVaultModal(this);
+			},
+		});
+
+		this.addCommand({
+			id: "vaultforge-generate-template-from-vault",
+			name: "Generate Template from Vault Notes",
 			callback: async () => {
-				try {
-					const results = await searchNotes("control");
-
-					if (results.length === 0) {
-						new Notice("No notes found.");
-						return;
-					}
-
-					new Notice(`Found: ${results.map((r) => r.title).join(", ")}`);
-				} catch (error) {
-					console.error(error);
-					new Notice("VaultForge search failed.");
-				}
+				await generateTemplateCommand(this);
 			},
 		});
 	}
 
 	onunload() {
 		console.log("VaultForge plugin unloaded");
+	}
+
+	async loadSettings(): Promise<void> {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+	}
+
+	async saveSettings(): Promise<void> {
+		await this.saveData(this.settings);
 	}
 }
