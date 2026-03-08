@@ -108,4 +108,6 @@ def parse_markdown(file_path: Path) -> dict[str, Any]:
         "tags": tags,
         "wikilinks": wikilinks,
         "sections": sections,
+        "raw_content": body,
+        "subsections": [s for s in sections if s["level"] > 2],
     }
