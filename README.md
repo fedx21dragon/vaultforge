@@ -27,8 +27,8 @@ Work in progress.
 - [x] backend skeleton
 - [x] database foundation
 - [x] sample vault + parser
-- [ ] indexer
-- [ ] obsidian plugin skeleton
+- [x] indexer
+- [x] obsidian plugin skeleton
 - [ ] template generation
 - [ ] retrieval
 - [ ] formula extraction
