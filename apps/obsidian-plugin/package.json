@@ -1,0 +1,15 @@
+{
+  "name": "vaultforge-obsidian-plugin",
+  "version": "0.1.0",
+  "description": "Obsidian plugin for VaultForge",
+  "main": "main.js",
+  "scripts": {
+    "dev": "esbuild src/main.ts --bundle --outfile=main.js --platform=browser --format=cjs --external:obsidian --watch",
+    "build": "esbuild src/main.ts --bundle --outfile=main.js --platform=browser --format=cjs --external:obsidian"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "obsidian": "^1.8.0",
+    "typescript": "^5.8.0"
+  }
+}
