@@ -26,7 +26,7 @@ Work in progress.
 - [x] bootstrap repository
 - [x] backend skeleton
 - [x] database foundation
-- [ ] sample vault + parser
+- [x] sample vault + parser
 - [ ] indexer
 - [ ] obsidian plugin skeleton
 - [ ] template generation
