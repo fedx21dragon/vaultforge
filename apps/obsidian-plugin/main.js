@@ -191,15 +191,15 @@ var VaultForgePlugin = class extends import_obsidian4.Plugin {
     await this.loadSettings();
     this.addSettingTab(new VaultForgeSettingTab(this.app, this));
     this.addCommand({
-      id: "vaultforge-say-hello",
-      name: "VaultForge: Say Hello",
+      id: "vaultforge-check",
+      name: "Say Hello",
       callback: () => {
         new import_obsidian4.Notice("VaultForge plugin is running.");
       }
     });
     this.addCommand({
       id: "vaultforge-backend-health",
-      name: "VaultForge: Check Backend Health",
+      name: "Check Backend Health",
       callback: async () => {
         try {
           const result = await fetchBackendHealth(this.settings);
@@ -212,14 +212,14 @@ var VaultForgePlugin = class extends import_obsidian4.Plugin {
     });
     this.addCommand({
       id: "vaultforge-search-vault",
-      name: "VaultForge: Search Vault",
+      name: "Search Vault",
       callback: () => {
         openSearchVaultModal(this);
       }
     });
     this.addCommand({
       id: "vaultforge-generate-template-from-vault",
-      name: "VaultForge: Generate Template from Vault Notes",
+      name: "Generate Template from Vault Notes",
       callback: async () => {
         await generateTemplateCommand(this);
       }
