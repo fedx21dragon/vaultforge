@@ -1,0 +1,9 @@
+{
+  "id": "vaultforge",
+  "name": "VaultForge",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Local-first AI assistant for Obsidian",
+  "author": "Federico",
+  "isDesktopOnly": true
+}

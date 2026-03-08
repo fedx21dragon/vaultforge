@@ -1,0 +1,12 @@
+services:
+  backend:
+    build:
+      context: ./apps/backend
+    container_name: vaultforge-backend
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./apps/backend/data:/app/data
+      - "/Users/federico/Documents/Obsidian Vault:/workspace/vault:ro"
+    restart: unless-stopped
