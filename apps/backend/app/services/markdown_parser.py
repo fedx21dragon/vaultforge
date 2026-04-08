@@ -65,7 +65,7 @@ def parse_sections(body: str) -> tuple[str | None, list[dict[str, Any]]]:
     for line in lines:
         stripped = line.strip()
 
-        if stripped.startswith("# ") and not stripped.startswith("## "):
+        if stripped.startswith("# "):
             title = stripped.removeprefix("# ").strip()
             continue
 

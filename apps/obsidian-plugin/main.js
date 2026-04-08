@@ -141,10 +141,11 @@ var VaultForgePlugin = class extends import_obsidian.Plugin {
             title,
             extra_tags: []
           });
-          const newFile = await this.app.vault.create(
-            `${title} (template).md`,
-            result.content
-          );
+          let fileName = `${title} (template).md`;
+          if (this.app.vault.getAbstractFileByPath(fileName)) {
+            fileName = `${title} (template ${Date.now()}).md`;
+          }
+          const newFile = await this.app.vault.create(fileName, result.content);
           await this.app.workspace.getLeaf().openFile(newFile);
           new import_obsidian.Notice(
             `Template created from ${result.source === "vault" ? "vault patterns" : "default"}.`

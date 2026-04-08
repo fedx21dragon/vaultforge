@@ -53,8 +53,8 @@ def _render_template(
     return "\n".join(lines)
 
 
-def _most_common_headings(heading_counts: Counter, min_occurrences: int = 1, top_n: int = 6) -> list[str]:
-    return [h for h, count in heading_counts.most_common(top_n) if count >= min_occurrences]
+def _most_common_headings(heading_counts: Counter, min_occurrences: int = 1, max_headings: int = 6) -> list[str]:
+    return [h for h, count in heading_counts.most_common(max_headings) if count >= min_occurrences]
 
 
 def generate_template(
