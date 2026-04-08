@@ -1,3 +1,15 @@
-APP_NAME = "VaultForge Backend"
-APP_VERSION = "0.1.0"
-VAULT = "/Users/federico/Documents/Obsidian Vault"
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    app_name: str = "VaultForge Backend"
+    app_version: str = "0.1.0"
+    vault_path: Path = Path("/workspace/vault")
+    backend_port: int = 8000
+
+
+settings = Settings()

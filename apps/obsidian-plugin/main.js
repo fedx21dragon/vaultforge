@@ -26,9 +26,15 @@ module.exports = __toCommonJS(main_exports);
 var import_obsidian = require("obsidian");
 
 // src/services/apiClient.ts
-var BASE_URL = "http://127.0.0.1:8000";
+var DEFAULT_BASE_URL = "http://localhost:8000";
+function getBaseUrl() {
+  return window.__vaultforgeBaseUrl ?? DEFAULT_BASE_URL;
+}
+function setBaseUrl(url) {
+  window.__vaultforgeBaseUrl = url.replace(/\/$/, "");
+}
 async function fetchBackendHealth() {
-  const response = await fetch(`${BASE_URL}/health`);
+  const response = await fetch(`${getBaseUrl()}/health`);
   if (!response.ok) {
     throw new Error(`Backend health check failed: ${response.status}`);
   }
@@ -36,18 +42,56 @@ async function fetchBackendHealth() {
 }
 async function searchNotes(query) {
   const response = await fetch(
-    `${BASE_URL}/search/notes?q=${encodeURIComponent(query)}`
+    `${getBaseUrl()}/search/notes?q=${encodeURIComponent(query)}`
   );
   if (!response.ok) {
     throw new Error(`Search failed: ${response.status}`);
   }
   return response.json();
 }
+async function generateTemplate(request) {
+  const response = await fetch(`${getBaseUrl()}/templates/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request)
+  });
+  if (!response.ok) {
+    throw new Error(`Template generation failed: ${response.status}`);
+  }
+  return response.json();
+}
 
 // src/main.ts
+var DEFAULT_SETTINGS = {
+  backendUrl: "http://localhost:8000"
+};
+var VaultForgeSettingTab = class extends import_obsidian.PluginSettingTab {
+  constructor(app, plugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
+  display() {
+    const { containerEl } = this;
+    containerEl.empty();
+    new import_obsidian.Setting(containerEl).setName("Backend URL").setDesc("URL of the VaultForge backend (default: http://localhost:8000).").addText(
+      (text) => text.setPlaceholder("http://localhost:8000").setValue(this.plugin.settings.backendUrl).onChange(async (value) => {
+        this.plugin.settings.backendUrl = value;
+        setBaseUrl(value);
+        await this.plugin.saveSettings();
+      })
+    );
+  }
+};
 var VaultForgePlugin = class extends import_obsidian.Plugin {
+  constructor() {
+    super(...arguments);
+    this.settings = DEFAULT_SETTINGS;
+  }
   async onload() {
     console.log("VaultForge plugin loaded");
+    await this.loadSettings();
+    setBaseUrl(this.settings.backendUrl);
+    this.addSettingTab(new VaultForgeSettingTab(this.app, this));
     this.addCommand({
       id: "vaultforge-say-hello",
       name: "VaultForge: Say Hello",
@@ -85,6 +129,38 @@ var VaultForgePlugin = class extends import_obsidian.Plugin {
         }
       }
     });
+    this.addCommand({
+      id: "vaultforge-generate-template",
+      name: "VaultForge: Generate Note Template",
+      callback: async () => {
+        try {
+          const activeFile = this.app.workspace.getActiveFile();
+          const title = activeFile?.basename ?? "Untitled";
+          const result = await generateTemplate({
+            note_type: "general",
+            title,
+            extra_tags: []
+          });
+          const newFile = await this.app.vault.create(
+            `${title} (template).md`,
+            result.content
+          );
+          await this.app.workspace.getLeaf().openFile(newFile);
+          new import_obsidian.Notice(
+            `Template created from ${result.source === "vault" ? "vault patterns" : "default"}.`
+          );
+        } catch (error) {
+          console.error(error);
+          new import_obsidian.Notice("VaultForge template generation failed.");
+        }
+      }
+    });
+  }
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+  async saveSettings() {
+    await this.saveData(this.settings);
   }
   onunload() {
     console.log("VaultForge plugin unloaded");

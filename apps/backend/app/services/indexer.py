@@ -17,10 +17,8 @@ def compute_file_hash(file_path: Path) -> str:
     return hashlib.sha256(content).hexdigest()
 
 # upsert note based on file path, creating or updating as needed
-def upsert_note(file_path: Path, vault_root: Path) -> None:
-    parsed = parse_markdown(file_path)
-
-    stat = file_path.stat()
+def upsert_note(file_path: Path, vault_root: Path) -> str:
+    """Index a single note. Returns 'created', 'updated', or 'skipped'."""
     file_hash = compute_file_hash(file_path)
     relative_path = file_path.relative_to(vault_root)
 
@@ -29,6 +27,11 @@ def upsert_note(file_path: Path, vault_root: Path) -> None:
     try:
         existing_note = session.query(Note).filter_by(path=str(relative_path)).first()
 
+        if existing_note is not None and existing_note.file_hash == file_hash:
+            return "skipped"
+
+        parsed = parse_markdown(file_path)
+        stat = file_path.stat()
         created_at = datetime.fromtimestamp(stat.st_ctime)
         updated_at = datetime.fromtimestamp(stat.st_mtime)
 
@@ -42,6 +45,7 @@ def upsert_note(file_path: Path, vault_root: Path) -> None:
             )
             session.add(note)
             session.flush()
+            action = "created"
         else:
             note = existing_note
             note.title = parsed["title"] or file_path.stem
@@ -49,8 +53,8 @@ def upsert_note(file_path: Path, vault_root: Path) -> None:
             note.file_hash = file_hash
 
             clear_note_dependencies(session, note.id)
+            action = "updated"
 
-        # Sections speichern
         for idx, section in enumerate(parsed["sections"]):
             db_section = Section(
                 note_id=note.id,
@@ -61,7 +65,6 @@ def upsert_note(file_path: Path, vault_root: Path) -> None:
             )
             session.add(db_section)
 
-        # Tags speichern
         for tag_name in parsed["tags"]:
             tag = get_or_create_tag(session, tag_name)
 
@@ -71,7 +74,6 @@ def upsert_note(file_path: Path, vault_root: Path) -> None:
             )
             session.add(note_tag)
 
-        # Wikilinks speichern
         for wikilink in parsed["wikilinks"]:
             link = Link(
                 source_note_id=note.id,
@@ -81,16 +83,18 @@ def upsert_note(file_path: Path, vault_root: Path) -> None:
             session.add(link)
 
         session.commit()
+        return action
 
     finally:
         session.close()
-# index vault 
+
+# index vault
 def index_vault(vault_root: Path) -> None:
     markdown_files = list(vault_root.rglob("*.md"))
 
     for file_path in markdown_files:
-        upsert_note(file_path, vault_root)
-        print(f"Indexed: {file_path.relative_to(vault_root)}")
+        action = upsert_note(file_path, vault_root)
+        print(f"[{action}] {file_path.relative_to(vault_root)}")
 
 # helper to get or create tags by name
 def get_or_create_tag(session, tag_name: str) -> Tag:

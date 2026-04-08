@@ -9,7 +9,7 @@ COPY pyproject.toml /app/pyproject.toml
 COPY app /app/app
 COPY scripts /app/scripts
 
-RUN pip install --no-cache-dir fastapi uvicorn pydantic sqlalchemy
+RUN pip install --no-cache-dir fastapi uvicorn pydantic pydantic-settings sqlalchemy
 
 EXPOSE 8000
 

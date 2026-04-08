@@ -4,6 +4,7 @@ from typing import Any
 
 
 WIKILINK_PATTERN = re.compile(r"\[\[([^\]]+)\]\]")
+HEADING_PATTERN = re.compile(r"^(#{2,6})\s+(.+)$")
 
 
 def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
@@ -64,18 +65,20 @@ def parse_sections(body: str) -> tuple[str | None, list[dict[str, Any]]]:
     for line in lines:
         stripped = line.strip()
 
-        if stripped.startswith("# "):
+        if stripped.startswith("# ") and not stripped.startswith("## "):
             title = stripped.removeprefix("# ").strip()
             continue
 
-        if stripped.startswith("## "):
+        heading_match = HEADING_PATTERN.match(stripped)
+        if heading_match:
             if current_section is not None:
                 current_section["content"] = "\n".join(buffer).strip()
                 sections.append(current_section)
 
+            level = len(heading_match.group(1))
             current_section = {
-                "heading": stripped.removeprefix("## ").strip(),
-                "level": 2,
+                "heading": heading_match.group(2).strip(),
+                "level": level,
             }
             buffer = []
             continue
@@ -109,5 +112,4 @@ def parse_markdown(file_path: Path) -> dict[str, Any]:
         "wikilinks": wikilinks,
         "sections": sections,
         "raw_content": body,
-        "subsections": [s for s in sections if s["level"] > 2],
     }

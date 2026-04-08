@@ -7,6 +7,8 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "pydantic",
+    "pydantic-settings",
+    "sqlalchemy",
 ]
 
 [tool.pytest.ini_options]

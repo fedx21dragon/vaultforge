@@ -1,9 +1,57 @@
-import { Notice, Plugin } from "obsidian";
-import { fetchBackendHealth, searchNotes } from "./services/apiClient";
+import { App, Notice, Plugin, PluginSettingTab, Setting } from "obsidian";
+import {
+	fetchBackendHealth,
+	generateTemplate,
+	searchNotes,
+	setBaseUrl,
+} from "./services/apiClient";
+
+interface VaultForgeSettings {
+	backendUrl: string;
+}
+
+const DEFAULT_SETTINGS: VaultForgeSettings = {
+	backendUrl: "http://localhost:8000",
+};
+
+class VaultForgeSettingTab extends PluginSettingTab {
+	plugin: VaultForgePlugin;
+
+	constructor(app: App, plugin: VaultForgePlugin) {
+		super(app, plugin);
+		this.plugin = plugin;
+	}
+
+	display(): void {
+		const { containerEl } = this;
+		containerEl.empty();
+
+		new Setting(containerEl)
+			.setName("Backend URL")
+			.setDesc("URL of the VaultForge backend (default: http://localhost:8000).")
+			.addText((text) =>
+				text
+					.setPlaceholder("http://localhost:8000")
+					.setValue(this.plugin.settings.backendUrl)
+					.onChange(async (value) => {
+						this.plugin.settings.backendUrl = value;
+						setBaseUrl(value);
+						await this.plugin.saveSettings();
+					})
+			);
+	}
+}
 
 export default class VaultForgePlugin extends Plugin {
+	settings: VaultForgeSettings = DEFAULT_SETTINGS;
+
 	async onload() {
 		console.log("VaultForge plugin loaded");
+
+		await this.loadSettings();
+		setBaseUrl(this.settings.backendUrl);
+
+		this.addSettingTab(new VaultForgeSettingTab(this.app, this));
 
 		this.addCommand({
 			id: "vaultforge-say-hello",
@@ -46,6 +94,44 @@ export default class VaultForgePlugin extends Plugin {
 				}
 			},
 		});
+
+		this.addCommand({
+			id: "vaultforge-generate-template",
+			name: "VaultForge: Generate Note Template",
+			callback: async () => {
+				try {
+					const activeFile = this.app.workspace.getActiveFile();
+					const title = activeFile?.basename ?? "Untitled";
+
+					const result = await generateTemplate({
+						note_type: "general",
+						title,
+						extra_tags: [],
+					});
+
+					const newFile = await this.app.vault.create(
+						`${title} (template).md`,
+						result.content
+					);
+
+					await this.app.workspace.getLeaf().openFile(newFile);
+					new Notice(
+						`Template created from ${result.source === "vault" ? "vault patterns" : "default"}.`
+					);
+				} catch (error) {
+					console.error(error);
+					new Notice("VaultForge template generation failed.");
+				}
+			},
+		});
+	}
+
+	async loadSettings() {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+	}
+
+	async saveSettings() {
+		await this.saveData(this.settings);
 	}
 
 	onunload() {
