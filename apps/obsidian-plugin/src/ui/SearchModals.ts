@@ -25,8 +25,9 @@ export class SearchModal extends SuggestModal<NoteSearchResult> {
 				return results;
 			})
 			.catch((error) => {
-				console.error(error);
-				new Notice("VaultForge search failed.");
+				const errorMessage = error instanceof Error ? error.message : String(error);
+				console.error("Search error:", errorMessage);
+				new Notice(`VaultForge search failed: ${errorMessage}`);
 				return [];
 			});
 	}

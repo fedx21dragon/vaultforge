@@ -28,6 +28,10 @@ def find_sections_for_notes(session: Session, note_ids: list[int]) -> list[Secti
         .all()
     )
 
+def aim_folder_for_template(folder:str , topic:str) -> str:
+    return None
+    
+
 
 def generate_template_from_notes(topic: str, notes: list[Note], sections: list[Section]) -> tuple[str, list[str]]:
     headings: list[str] = []

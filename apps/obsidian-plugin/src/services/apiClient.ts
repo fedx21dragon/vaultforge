@@ -69,7 +69,10 @@ export async function searchNotes(
 	);
 
 	if (!response.ok) {
-		throw new Error(`Search failed: ${response.status}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Search failed (${response.status}): ${errorBody}`
+		);
 	}
 
 	return response.json();
@@ -92,7 +95,10 @@ export async function generateTemplateFromVault(
 	);
 
 	if (!response.ok) {
-		throw new Error(`Template generation failed: ${response.status}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Template generation failed (${response.status}): ${errorBody}`
+		);
 	}
 
 	return response.json();

@@ -23,7 +23,8 @@ export async function generateTemplateCommand(plugin: VaultForgePlugin): Promise
 			`Template created: ${fileName} (from ${result.source_notes.length} source notes)`
 		);
 	} catch (error) {
-		console.error(error);
-		new Notice("VaultForge template generation failed.");
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		console.error("Template generation error:", errorMessage);
+		new Notice(`Template generation failed: ${errorMessage}`);
 	}
 }
